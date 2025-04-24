@@ -1,19 +1,20 @@
 # IGController
 
-**IGController** is a Python-based tool for managing and automating Instagram accounts. It provides a structured approach to interact with Instagram's API and automate common tasks such as posting and user interaction.
+**IGController** is a Python-based tool for managing and automating Instagram accounts, now fully controlled via a Telegram bot. It provides a structured approach to interact with Instagram's API and automate common tasks such as posting and user interaction.
 
 ---
 
 ## 🚀 Features
 
 - 📱 Instagram account management
-- 🤖 Automated posting and interaction
+- 🤖 Automated posting and interaction via Telegram bot
 - ⚙️ Configurable through environment variables
 - 🧩 Modular architecture with handlers and helpers
 
 ---
 
 ## 🧾 Project Structure
+
 
 ```
 IGController/
