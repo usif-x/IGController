@@ -1,8 +1,3 @@
-Here's a clean and well-formatted `README.md` file for your **IGController** GitHub repository:
-
----
-
-```markdown
 # IGController
 
 **IGController** is a Python-based tool for managing and automating Instagram accounts. It provides a structured approach to interact with Instagram's API and automate common tasks such as posting and user interaction.
@@ -121,8 +116,3 @@ Contributions are welcome! Please fork the repository and submit a pull request.
 ## ⚠️ Disclaimer
 
 This tool is for **educational purposes only**. Use at your own risk and ensure compliance with Instagram's [Terms of Service](https://help.instagram.com/581066165581870).
-```
-
----
-
-Let me know if you'd like to add badges (e.g., build status, license), or a contributing guide in a separate file like `CONTRIBUTING.md`.
