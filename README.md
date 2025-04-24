@@ -79,9 +79,6 @@ BOT_TOKEN=your_bot_token # Your Telegram bot token
 OPENROUTER_KEY=your_openrouter_api_key # Your OpenRouter API key
 OPENROUTER_MODEL=your_ai_model # e.g., google/gemini-2.0-flash-exp:free
 
-# Database Configuration
-MONGO_URI=your_mongodb_uri # e.g., mongodb://localhost:27017
-
 # Application Settings
 DEBUG=True # Set to False in production
 LOG_LEVEL=INFO # DEBUG, INFO, WARNING, ERROR, CRITICAL
