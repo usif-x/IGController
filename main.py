@@ -3,6 +3,7 @@ import config
 from src.helpers.ig.login import InstagramHelper
 from src.handlers.bot.start_handler import StartHandler
 from src.handlers.bot.callback_handler import CallbackHandler
+from src.handlers.bot.ai_handler import AIHandler
 
 # Initialize Instagram helper
 ig_helper = InstagramHelper()
@@ -13,6 +14,7 @@ bot = TeleBot(config.bot_token)
 # Initialize handlers
 start_handler = StartHandler(bot, ig_helper)
 callback_handler = CallbackHandler(bot, ig_helper, start_handler)
+ai_handler = AIHandler(bot)
 
 def is_admin(data):
     return str(data.from_user.id) == config.admin_id
@@ -35,6 +37,37 @@ def handle_commands(message):
         start_handler.handle_help_command(message)
     elif message.text == '/account':
         start_handler.handle_account_info(message)
+    elif message.text.startswith('/ai'):
+        # Check if there's text after the /ai command
+        if len(message.text) > 3 and message.text[3] == ' ':
+            # Extract the query after "/ai "
+            query = message.text[4:].strip()
+            if query:
+                # Create a new message with just the query
+                ai_handler.handle_ai_message(message)
+            else:
+                bot.reply_to(message, "Please provide a question after /ai")
+        else:
+            # Just /ai command without text
+            ai_handler.handle_ai_command(message)
+    elif message.text.startswith('/ask '):
+        # Handle direct AI queries like "/ask What is Instagram?"
+        query = message.text[5:].strip()
+        if query:
+            # Create a new message object with just the query
+            ai_message = types.Message(
+                message_id=message.message_id,
+                from_user=message.from_user,
+                date=message.date,
+                chat=message.chat,
+                content_type='text',
+                options={},
+                json_string=None
+            )
+            ai_message.text = query
+            ai_handler.handle_ai_message(ai_message)
+        else:
+            bot.reply_to(message, "Please provide a question after /ask")
     elif message.text == '/logout':
         # Add logout command
         try:
@@ -60,5 +93,13 @@ if __name__ == '__main__':
     success, message = ig_helper.login()
     print(f"Login status: {success}, Message: {message}")
     
-    # Start the bot
-    bot.infinity_polling()
+    # Start the bot with connection resilience
+    while True:
+        try:
+            bot.infinity_polling()
+        except (ConnectionResetError, ConnectionError) as e:
+            print(f"Connection error: {str(e)}. Reconnecting in 5 seconds...")
+            time.sleep(5)
+        except Exception as e:
+            print(f"Critical error: {str(e)}")
+            break
