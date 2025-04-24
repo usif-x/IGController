@@ -103,7 +103,7 @@ The project follows a modular structure for ease of extension and maintenance:
 
 ## 📄 License
 
-[Your chosen license]
+This project is licensed under the MIT License.
 
 ---
 
