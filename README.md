@@ -46,7 +46,7 @@ IGController/
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/IGController.git
+git clone https://github.com/usif-x/IGController.git
 cd IGController
 ```
 
