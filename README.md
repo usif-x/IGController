@@ -67,8 +67,30 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory with your Instagram credentials:
 
 ```env
+# Instagram API Credentials
 IG_USERNAME=your_instagram_username
 IG_PASSWORD=your_instagram_password
+
+# Telegram Configuration
+ADMIN_ID=your_admin_id # Your Telegram user ID
+BOT_TOKEN=your_bot_token # Your Telegram bot token
+
+# OpenAI Configuration
+OPENROUTER_KEY=your_openrouter_api_key # Your OpenRouter API key
+OPENROUTER_MODEL=your_ai_model # e.g., google/gemini-2.0-flash-exp:free
+
+# Database Configuration
+MONGO_URI=your_mongodb_uri # e.g., mongodb://localhost:27017
+
+# Application Settings
+DEBUG=True # Set to False in production
+LOG_LEVEL=INFO # DEBUG, INFO, WARNING, ERROR, CRITICAL
+TIMEOUT=30 # Seconds
+
+# Other Settings
+MAX_RETRIES=3 # Retries for failed requests
+WAIT_BETWEEN_REQUESTS=20 # Seconds
+MAX_ACCOUNTS=5 # Maximum number of accounts to process concurrently
 ```
 
 ---
