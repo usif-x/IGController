@@ -78,3 +78,55 @@ class InstagramHelper:
         except Exception as e:
             print(f"Error getting account info: {str(e)}")
             return None
+
+    def edit_profile(self, fullname: str = None, biography: str = None, website: str = None, email: str = None, phone_number: str = None) -> bool:
+        """
+        Edits the Instagram profile settings.
+        Only provide the arguments for the fields you want to change.
+
+        Args:
+            fullname (str, optional): New full name.
+            biography (str, optional): New biography.
+            website (str, optional): New external URL (website).
+            email (str, optional): New email.
+            phone_number (str, optional): New phone number.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        if not self.client or not self.is_logged_in:
+            print("Error: Not logged in.")
+            return False
+
+        try:
+            # Prepare the data dictionary, only including non-None values
+            data_to_edit = {}
+            if fullname is not None:
+                data_to_edit['first_name'] = fullname # instagrapi uses 'first_name' for full name
+            if biography is not None:
+                data_to_edit['biography'] = biography
+            if website is not None:
+                data_to_edit['external_url'] = website # instagrapi uses 'external_url'
+            if email is not None:
+                data_to_edit['email'] = email
+            if phone_number is not None:
+                data_to_edit['phone_number'] = phone_number
+
+            if not data_to_edit:
+                print("Warning: No fields provided to edit.")
+                return False # Or True, depending on desired behavior for no changes
+
+            # Call instagrapi's account_edit
+            result = self.client.account_edit(**data_to_edit)
+            print(f"Account edit result: {result}") # Log the result for debugging
+            # Check if the result indicates success (instagrapi might return user info dict on success)
+            return isinstance(result, dict) and result.get('username') == self.client.username
+
+        except LoginRequired:
+            print("Error: Login required to edit profile.")
+            self.is_logged_in = False
+            # Attempt to re-login might be needed here
+            return False
+        except Exception as e:
+            print(f"Error editing Instagram profile: {str(e)}")
+            return False

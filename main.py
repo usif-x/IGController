@@ -1,5 +1,7 @@
-from telebot import TeleBot
+from telebot import TeleBot, types # Make sure types is imported
 import config
+import time # Import time for sleep
+import os # Import os for path checks
 from src.helpers.ig.login import InstagramHelper
 from src.handlers.bot.start_handler import StartHandler
 from src.handlers.bot.callback_handler import CallbackHandler
@@ -13,8 +15,9 @@ bot = TeleBot(config.bot_token)
 
 # Initialize handlers
 start_handler = StartHandler(bot, ig_helper)
-callback_handler = CallbackHandler(bot, ig_helper, start_handler)
+callback_handler = CallbackHandler(bot, ig_helper, start_handler) # Pass start_handler
 ai_handler = AIHandler(bot)
+
 
 def is_admin(data):
     return str(data.from_user.id) == config.admin_id
@@ -24,11 +27,38 @@ def handle_all_messages(message):
     if not is_admin(message):
         bot.reply_to(message, "⛔ This bot is not available for you")
         return
-    
+
+    # Check if it's a reply to one of our prompts (for editing)
+    if message.reply_to_message and message.reply_to_message.from_user.id == bot.get_me().id:
+         # Check if it's a reply related to profile editing
+         if callback_handler.user_states.get(message.chat.id, {}).get("action", "").startswith("edit_"):
+              callback_handler.handle_edit_reply(message)
+              return # Stop further processing if it was an edit reply
+
+         # Check if it's a reply related to AI (if you implement /ai prompt replies)
+         # elif ai_handler.is_ai_reply(message): # You'd need to implement this check
+         #     ai_handler.handle_ai_reply(message)
+         #     return
+
+         # Check if it's a reply related to login
+         elif message.reply_to_message.text == "🔑 Please enter your Instagram username:":
+             callback_handler.process_username_step(message)
+             return
+         elif message.reply_to_message.text == "🔒 Please enter your Instagram password:":
+             callback_handler.process_password_step(message)
+             return
+
+
     if message.text.startswith('/'):
         handle_commands(message)
+    # elif message.content_type == 'text': # Handle non-command text if needed
+    #     # Example: Treat non-command text as an AI query if desired
+    #     # ai_handler.handle_ai_message(message)
+    #     bot.reply_to(message, "❌ Unrecognized action. Use /help to see commands.")
     else:
-        bot.reply_to(message, "❌ Unrecognized action")
+         # Handle other content types if necessary
+         bot.reply_to(message, "❌ Unrecognized action or content type.")
+
 
 def handle_commands(message):
     if message.text == '/start':
@@ -43,42 +73,39 @@ def handle_commands(message):
             # Extract the query after "/ai "
             query = message.text[4:].strip()
             if query:
-                # Create a new message with just the query
+                # Modify message text to be only the query for the handler
+                message.text = query
                 ai_handler.handle_ai_message(message)
             else:
                 bot.reply_to(message, "Please provide a question after /ai")
         else:
             # Just /ai command without text
-            ai_handler.handle_ai_command(message)
+            ai_handler.handle_ai_command(message) # This prompts the user
     elif message.text.startswith('/ask '):
         # Handle direct AI queries like "/ask What is Instagram?"
         query = message.text[5:].strip()
         if query:
-            # Create a new message object with just the query
-            ai_message = types.Message(
-                message_id=message.message_id,
-                from_user=message.from_user,
-                date=message.date,
-                chat=message.chat,
-                content_type='text',
-                options={},
-                json_string=None
-            )
-            ai_message.text = query
-            ai_handler.handle_ai_message(ai_message)
+            # Modify message text to be only the query for the handler
+            message.text = query
+            ai_handler.handle_ai_message(message)
         else:
             bot.reply_to(message, "Please provide a question after /ask")
     elif message.text == '/logout':
         # Add logout command
         try:
-            ig_helper.client.logout()
-            if os.path.exists(ig_helper.session_file):
+            logged_out = ig_helper.client.logout()
+            if logged_out and os.path.exists(ig_helper.session_file):
                 os.remove(ig_helper.session_file)
-            bot.reply_to(message, "✅ Successfully logged out")
+                bot.reply_to(message, "✅ Successfully logged out and session removed.")
+            elif logged_out:
+                 bot.reply_to(message, "✅ Successfully logged out (no session file found).")
+            else:
+                 bot.reply_to(message, "ℹ️ Logout function executed, but status unclear (might have already been logged out).")
         except Exception as e:
             bot.reply_to(message, f"❌ Error during logout: {str(e)}")
     else:
-        bot.reply_to(message, "❌ Unrecognized command")
+        bot.reply_to(message, "❌ Unrecognized command. Use /help.")
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback(call):
